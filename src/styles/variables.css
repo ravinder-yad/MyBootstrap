@@ -1,0 +1,32 @@
+:root {
+  /* ☀️ Light Mode */
+  --bg-main: #FFFFFF;
+  --bg-panel: #F8FAFC; /* Slate 50 */
+  --text-primary: #1E293B; /* Slate 800 */
+  --text-secondary: #64748B; /* Slate 500 */
+  --border-subtle: #E2E8F0; /* Slate 200 */
+  
+  --primary: #3B82F6; /* Blue 500 */
+  --accent: #8B5CF6; /* Violet 500 */
+  
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body.dark {
+  /* 🌙 Dark Mode */
+  --bg-main: #0F172A; /* Slate 900 */
+  --bg-panel: #1E293B; /* Slate 800 */
+  --text-primary: #F8FAFC; /* Slate 50 */
+  --text-secondary: #94A3B8; /* Slate 400 */
+  --border-subtle: #334155; /* Slate 700 */
+  
+  --primary: #60A5FA; /* Blue 400 */
+  --accent: #A78BFA; /* Violet 400 */
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  transition: background-color 0.3s, color 0.3s;
+}
