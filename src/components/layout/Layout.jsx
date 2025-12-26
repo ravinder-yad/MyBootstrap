@@ -4,7 +4,7 @@ import Navbar from './Navbar';
 import Sidebar from '../sidebar/Sidebar';
 import Footer from './Footer';
 
-const Layout = () => {
+const Layout = ({ isDark, toggleTheme }) => {
     const location = useLocation();
     const navigate = useNavigate(); // added hook
 
@@ -59,8 +59,8 @@ const Layout = () => {
                 onLogoClick={() => navigate("/")}
                 onHamburgerClick={toggleSidebar}
                 showHamburger={isDocsRoute}
-            // Pass other props if Navbar needs them, e.g. theme toggle 
-            // (assuming ThemeProvider or props drilling from App)
+                isDark={isDark}
+                toggleTheme={toggleTheme}
             />
 
             <div className="flex flex-1 relative overflow-hidden">

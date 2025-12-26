@@ -15,18 +15,18 @@ const CodeBlock = ({ code, language = 'bash' }) => {
     };
 
     return (
-        <div className="relative group rounded-lg overflow-hidden border border-border bg-slate-950 text-slate-50 my-4 shadow-sm">
-            <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
+        <div className="relative group rounded-lg overflow-hidden border border-border bg-[var(--bg-code)] text-[var(--text-code)] my-4 shadow-sm">
+            <div className="flex items-center justify-between px-4 py-2 bg-secondary border-b border-border">
                 <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{language}</span>
                 <button
                     onClick={handleCopy}
-                    className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                    className="p-1.5 rounded-md hover:bg-background text-muted-foreground hover:text-foreground transition-colors"
                     title="Copy to clipboard"
                 >
                     {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                 </button>
             </div>
-            <div className="p-4 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            <div className="p-4 overflow-x-auto custom-scrollbar">
                 <pre className="font-mono text-sm leading-relaxed">
                     <code>{code}</code>
                 </pre>
