@@ -1,5 +1,6 @@
-@import "tailwindcss";
-@config "../../tailwind.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* 
   We import the variables here so Tailwind can access them.
