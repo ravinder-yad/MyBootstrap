@@ -92,39 +92,20 @@ const SidebarItem = ({ item, level = 0, onLinkClick }) => {
 
 // 3. Main Sidebar Component
 const Sidebar = ({ className, onLinkClick }) => {
-    // Determine context based on URL if needed, but for now we show "Docs" by default or handle logic in parent. 
-    // However, the config logic relied on `activeSection` passed from App.
-    // If we want to keep that section logic ("Docs" vs "UI Library"), we can get it from URL or just show all for now?
-    // User asked for "Real Docs" behavior. Usually that implies context switching.
-    // I will simplify and show ALL sections or check URL segment.
-    // For now, let's assume "Docs" is the main one, as other sections are empty in routes.
-    // I'll grab context from URL path simply (e.g. starts with /examples -> Examples).
-
-    // Simple logic:
-    // /ui/... -> UI Library
-    // /examples/... -> Examples
-    // else -> Docs
-
-    const location = window.location.pathname; // Reading directly (or useLocation hook if wrapped)
-    // Note: Since this component is inside Router, let's use useLocation if we refactor to functional with hooks clean.
-    // But direct window check is okay strictly for rendering logic initial pass if lazy.
-    // Better: use NavLink matches.
-
-    // Better logic: Show everything or filter?
-    // The previous Sidebar filtered based on top nav selection.
-    // If we want that behavior, Sidebar needs access to that state or derived from URL.
-    // Let's derive from URL.
+    const location = window.location.pathname;
 
     let activeSection = "Docs";
     if (location.startsWith("/ui")) activeSection = "UI Library";
     else if (location.startsWith("/examples")) activeSection = "Examples";
+    // Check if we are in a docs route but NOT in UI or Examples (already handled)
+    // The default "Docs" covers Getting Started, Customize, etc.
 
     const filteredConfig = sidebarConfig.filter(group =>
         group.navSection === activeSection || !group.navSection
     );
 
     return (
-        <div className={`flex flex-col h-full ${className ? className : 'bg-card/60 backdrop-blur-sm w-[260px] h-[calc(100vh-60px)] sticky top-[60px] border-r border-border'}`}>
+        <aside className={`${className} flex flex-col bg-card/60 backdrop-blur-sm border-r border-border`}>
             <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
                 {filteredConfig.length > 0 ? (
                     filteredConfig.map((section, index) => (
@@ -159,7 +140,7 @@ const Sidebar = ({ className, onLinkClick }) => {
                     <Settings size={14} className="ml-auto text-muted-foreground/70" />
                 </div>
             </div>
-        </div>
+        </aside>
     );
 };
 

@@ -108,10 +108,18 @@ import ExamplesPage from './pages/examples/ExamplesPage';
 import TemplatesPage from './pages/templates/TemplatesPage';
 import BlogPage from './pages/blog/BlogPage';
 import BlogPostPage from './pages/blog/BlogPostPage';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import ProfilePage from './pages/auth/ProfilePage';
 
 const routes = [
     // Landing Page
     { path: '/', component: HomePage },
+
+    // Auth Routes
+    { path: '/login', component: LoginPage },
+    { path: '/signup', component: SignupPage },
+    { path: '/profile', component: ProfilePage },
 
     // Examples Landing
     { path: '/examples', component: ExamplesPage },

@@ -2,8 +2,11 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, Search, Github, Moon, Sun } from 'lucide-react';
 import { sidebarConfig } from '../../sidebar.config';
+import { useAuth } from '../../context/AuthContext';
+import UserDropdown from '../auth/UserDropdown';
 
-const Navbar = ({ onToggleSidebar, onToggleMobileMenu, isDark, toggleTheme, showSidebarTrigger = true }) => {
+const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, showHamburger = true, showSidebarTrigger }) => {
+    const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -67,6 +70,11 @@ const Navbar = ({ onToggleSidebar, onToggleMobileMenu, isDark, toggleTheme, show
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Determine visibility of hamburger (backwards compatibility or new prop)
+    const showMenuTrigger = showHamburger || showSidebarTrigger;
+    // Handler priority
+    const handleMenuClick = onHamburgerClick || onToggleMobileMenu;
+
     return (
         <header className="h-[60px] border-b border-border flex items-center justify-between px-4 sm:px-6 bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
 
@@ -74,9 +82,9 @@ const Navbar = ({ onToggleSidebar, onToggleMobileMenu, isDark, toggleTheme, show
             <div className="flex items-center gap-6 lg:gap-8">
                 {/* 1. Mobile Menu & Brand */}
                 <div className="flex items-center gap-3">
-                    {showSidebarTrigger && (
+                    {showMenuTrigger && (
                         <button
-                            onClick={onToggleMobileMenu}
+                            onClick={handleMenuClick}
                             className="lg:hidden p-2 -ml-2 mr-2 text-muted-foreground hover:bg-muted rounded-md"
                             title="Toggle Menu"
                         >
@@ -107,7 +115,10 @@ const Navbar = ({ onToggleSidebar, onToggleMobileMenu, isDark, toggleTheme, show
                                 location.pathname.startsWith('/content') ||
                                 location.pathname.startsWith('/forms') ||
                                 location.pathname.startsWith('/components') ||
-                                location.pathname.startsWith('/utilities')
+                                location.pathname.startsWith('/helpers') ||
+                                location.pathname.startsWith('/utilities') ||
+                                location.pathname.startsWith('/about') ||
+                                location.pathname.startsWith('/ui')
                                 ? 'text-primary bg-primary/10'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                             }`}
@@ -193,17 +204,25 @@ const Navbar = ({ onToggleSidebar, onToggleMobileMenu, isDark, toggleTheme, show
 
                 <div className="h-4 w-px bg-border hidden sm:block"></div>
 
-                <div className="flex items-center gap-1">
-                    <a
-                        href="https://github.com/ravinder-yad"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                        title="GitHub"
-                    >
-                        <Github size={20} />
-                    </a>
+                {/* AUTH BUTTONS OR USER DROPDOWN */}
+                {user ? (
+                    <UserDropdown />
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <Link to="/login">
+                            <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1">
+                                Sign in
+                            </button>
+                        </Link>
+                        <Link to="/signup">
+                            <button className="hidden sm:block bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                                Sign up
+                            </button>
+                        </Link>
+                    </div>
+                )}
 
+                <div className="flex items-center gap-1 ml-2 border-l border-border pl-2">
                     <button
                         onClick={toggleTheme}
                         className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -212,13 +231,6 @@ const Navbar = ({ onToggleSidebar, onToggleMobileMenu, isDark, toggleTheme, show
                         {isDark ? <Moon size={20} /> : <Sun size={20} />}
                     </button>
                 </div>
-
-                <button
-                    className="hidden sm:block ml-2 bg-foreground text-background hover:bg-foreground/90 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm"
-                    onClick={() => window.open('https://getbootstrap.com', '_blank')}
-                >
-                    Download
-                </button>
             </div>
 
         </header>
