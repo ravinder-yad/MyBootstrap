@@ -1,98 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'; // added useNavigate
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from '../sidebar/Sidebar';
+import MobileNav from './MobileNav';
 import Footer from './Footer';
 
 const Layout = ({ isDark, toggleTheme }) => {
     const location = useLocation();
-    const navigate = useNavigate(); // added hook
+    const navigate = useNavigate();
 
-    // 1. Determine if we are on a "Docs" route
-    // The user specified /docs/* but existing routes seem to use /getting-started, /components etc.
-    // Based on sidebar.config.js, docs routes are:
-    // /getting-started/*, /customize/*, /layout/*, /content/*, /forms/*, /components/*, /helpers/*, /utilities/*, /extend/*, /about/*
-    // AND /ui/* for UI library if we consider that "docs-like" sidebar behavior.
-    // The user said: "When I click on Docs (/docs and all /docs/* routes)" -> BUT current routes are flattened.
-    // I will assume ANY route that IS NOT Home, Examples, Templates, Blog is a "Docs" route.
-
+    // 1. Route Logic (Docs vs Full Width)
+    // "Docs" routes act as the default unless we are on a specific "Special Page"
     const isSpecialPage =
         location.pathname === '/' ||
         location.pathname.startsWith('/examples') ||
         location.pathname.startsWith('/templates') ||
-        location.pathname.startsWith('/blog');
+        location.pathname.startsWith('/blog') ||
+        location.pathname.startsWith('/login') ||
+        location.pathname.startsWith('/signup') ||
+        location.pathname.startsWith('/profile');
 
     const isDocsRoute = !isSpecialPage;
 
-    // 2. Sidebar State
-    // Default open if on docs, closed otherwise.
-    const [sidebarOpen, setSidebarOpen] = useState(isDocsRoute);
+    // 2. Mobile Nav State (Drawer)
+    const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-    // Sync state with route changes
+    // Auto-close mobile nav on route change
     useEffect(() => {
-        setSidebarOpen(isDocsRoute);
-    }, [isDocsRoute]);
+        setIsMobileNavOpen(false);
+    }, [location.pathname]);
 
-    // 3. Mobile Hamburger Logic
-    const toggleSidebar = () => {
-        if (!isDocsRoute) return;
-        setSidebarOpen(!sidebarOpen);
-    };
-
-    // Auto-close on mobile link click
-    const handleLinkClick = () => {
-        if (window.innerWidth < 1024 && isDocsRoute) { // using 1024px (lg) as breakpoint based on existing App.jsx
-            setSidebarOpen(false);
-        }
-    };
-
-    // 4. Layout Classes
-    // If docs route AND sidebar is open -> push content? 
-    // Existing Sidebar.jsx was fixed/sticky. 
-    // Let's us the pattern from the plan: 
-    // Sidebar rendered if isDocsRoute. 
-    // Main content margin if sidebar open (desktop).
+    // 3. Desktop Sidebar State
+    // Default open on docs, closed otherwise. 
+    // On Desktop, "Closed" means hidden/collapsed.
+    // For now, we'll keep it simple: On Docs route -> It is distinct column.
 
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground">
+        <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
+            {/* Top Navbar */}
             <Navbar
-                onLogoClick={() => navigate("/")}
-                onHamburgerClick={toggleSidebar}
-                showHamburger={isDocsRoute}
+                onHamburgerClick={() => setIsMobileNavOpen(true)}
+                showHamburger={true} // Always show hamburger on mobile (controlled by CSS in Navbar)
+                showSidebarTrigger={isDocsRoute} // Only relevant if we want a specific sidebar toggle
                 isDark={isDark}
                 toggleTheme={toggleTheme}
             />
 
-            <div className="flex flex-1 relative overflow-hidden">
-                {/* Sidebar - Only Rendered on Docs Routes */}
+            {/* Mobile Navigation Drawer (Overlay) */}
+            <MobileNav
+                isOpen={isMobileNavOpen}
+                onClose={() => setIsMobileNavOpen(false)}
+            />
+
+            <div className="flex flex-1 relative">
+                {/* Desktop Sidebar - ONLY on Docs Routes */}
                 {isDocsRoute && (
-                    <Sidebar
-                        open={sidebarOpen}
-                        onLinkClick={handleLinkClick}
-                        className={`
-                            fixed inset-y-0 left-0 z-40
-                            transform transition-transform duration-300 ease-in-out
-                            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                            lg:transform-none
-                            ${!sidebarOpen && 'lg:hidden'} 
-                            w-64 border-r border-border bg-card/60 backdrop-blur-sm
-                            h-[calc(100vh-60px)] top-[60px]
-                        `}
-                    // Note: Sidebar component needs to handle 'className' or we wrap it
-                    />
+                    <aside className="hidden lg:block w-[280px] border-r border-border h-[calc(100vh-60px)] sticky top-[60px] overflow-hidden bg-background/50 backdrop-blur-sm z-30">
+                        <Sidebar
+                            className="h-full w-full"
+                        />
+                    </aside>
                 )}
 
-                {/* Main Content */}
-                <main className={`flex-1 overflow-y-auto w-full transition-all duration-300 ${isDocsRoute && sidebarOpen ? 'lg:ml-64' : ''}`}>
-                    {/* 
-                        If sidebar is 'relative' on desktop, flex-1 takes remaining space automatically.
-                        If sidebar is 'fixed' (mobile), main takes full width.
-                     */}
-                    <div className={isDocsRoute ? "container mx-auto px-4 py-8 max-w-7xl animate-in fade-in active" : "w-full animate-in fade-in"}>
+                {/* Main Content Area */}
+                <main className={`flex-1 min-w-0 flex flex-col ${isDocsRoute ? '' : 'w-full'}`}>
+                    <div className={isDocsRoute ? "container mx-auto px-4 py-8 max-w-5xl animate-in fade-in slide-in-from-bottom-2 duration-500" : "flex-1 w-full animate-in fade-in duration-500"}>
                         <Outlet />
                     </div>
-                    {/* Footer is usually inside main or below? existing App had it inside main */}
-                    <Footer />
+
+                    {/* Footer - Global but bottom of content */}
+                    {!isDocsRoute && <Footer />}
+                    {/* On Docs, maybe footer is inside the container? Or global? 
+                        User spec says "FOOTER (global)". 
+                        Let's keep it here for now.
+                    */}
+                    {isDocsRoute && (
+                        <div className="mt-auto border-t border-border mt-12">
+                            <Footer />
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

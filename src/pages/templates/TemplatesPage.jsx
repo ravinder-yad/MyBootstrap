@@ -80,7 +80,7 @@ const TemplatesPage = () => {
     const featuredTemplates = templates.filter(t => t.featured);
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             {/* 1. HEADER */}
             <div className="text-center max-w-2xl mx-auto pt-8">
                 <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-foreground">
@@ -99,8 +99,8 @@ const TemplatesPage = () => {
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
                             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border ${activeCategory === cat
-                                    ? 'bg-primary text-primary-foreground border-primary'
-                                    : 'bg-card text-muted-foreground border-border hover:border-foreground/20 hover:text-foreground'
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-card text-muted-foreground border-border hover:border-foreground/20 hover:text-foreground'
                                 }`}
                         >
                             {cat}

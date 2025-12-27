@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Book, Layout, Layers, FileText, Home } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import Sidebar from '../sidebar/Sidebar'; // Importing the flexible Sidebar
 
 const MobileNav = ({ isOpen, onClose }) => {
@@ -14,6 +15,14 @@ const MobileNav = ({ isOpen, onClose }) => {
             document.body.style.overflow = '';
         };
     }, [isOpen]);
+
+    const navItems = [
+        { label: 'Home', path: '/', icon: Home },
+        { label: 'Docs', path: '/getting-started/introduction', icon: Book },
+        { label: 'Examples', path: '/examples', icon: Layout },
+        { label: 'Templates', path: '/templates', icon: Layers },
+        { label: 'Blog', path: '/blog', icon: FileText },
+    ];
 
     return (
         <div
@@ -44,11 +53,39 @@ const MobileNav = ({ isOpen, onClose }) => {
                         </button>
                     </div>
 
-                    {/* Reuse Sidebar Component with Mobile Styles */}
-                    <Sidebar
-                        className="w-full flex-1 overflow-hidden bg-background" // Override desktop styles
-                        onLinkClick={onClose} // Close drawer on link click
-                    />
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        {/* 1. Global Navigation Links (Mobile Only) */}
+                        <div className="p-3 border-b border-border space-y-1">
+                            {navItems.map((item) => (
+                                <NavLink
+                                    key={item.label}
+                                    to={item.path}
+                                    onClick={onClose}
+                                    className={({ isActive }) => `
+                                        flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
+                                        ${isActive
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                        }
+                                    `}
+                                >
+                                    <item.icon size={18} />
+                                    {item.label}
+                                </NavLink>
+                            ))}
+                        </div>
+
+                        {/* 2. Contextual Sidebar (Docs / Components tree) */}
+                        <div className="pt-2">
+                            <h3 className="px-6 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                {window.location.pathname.startsWith('/examples') ? 'Categories' : 'Explore'}
+                            </h3>
+                            <Sidebar
+                                className="w-full bg-transparent border-none"
+                                onLinkClick={onClose}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

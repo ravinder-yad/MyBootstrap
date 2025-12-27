@@ -14,6 +14,10 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
+
+    // Mobile Search Toggle
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
     const searchRef = useRef(null);
 
     // 🔄 FLATTEN CONFIG FOR SEARCH INDEX
@@ -57,6 +61,7 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
         navigate(path);
         setSearchQuery('');
         setShowResults(false);
+        setIsMobileSearchOpen(false); // Close mobile search on selection
     };
 
     // 🖱️ CLOSE ON CLICK OUTSIDE
@@ -64,6 +69,7 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 setShowResults(false);
+                // Don't auto-close mobile search on click outside immediately, user might just miss
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -76,10 +82,11 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
     const handleMenuClick = onHamburgerClick || onToggleMobileMenu;
 
     return (
-        <header className="h-[60px] border-b border-border flex items-center justify-between px-4 sm:px-6 bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
+        <header className="h-[60px] border-b border-border flex items-center justify-between px-4 sm:px-6 bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300 relative">
 
             {/* 🟦 LEFT: BRAND & NAV LINKS */}
-            <div className="flex items-center gap-6 lg:gap-8">
+            {/* Hide Brand when Mobile Search is Open */}
+            <div className={`flex items-center gap-6 lg:gap-8 ${isMobileSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
                 {/* 1. Mobile Menu & Brand */}
                 <div className="flex items-center gap-3">
                     {showMenuTrigger && (
@@ -104,7 +111,6 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
 
                 {/* 2. Primary Navigation (Desktop) */}
                 <nav className="hidden md:flex items-center gap-1">
-
                     {/* Docs Link */}
                     <NavLink
                         to="/getting-started/introduction"
@@ -149,7 +155,11 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
 
 
             {/* 🟨 CENTER: GLOBAL SEARCH */}
-            <div className="flex-1 max-w-md px-4 hidden sm:block relative" ref={searchRef}>
+            {/* Desktop: Always Visible | Mobile: Visible if Toggled */}
+            <div
+                className={`flex-1 max-w-md px-4 relative transition-all duration-300 ${isMobileSearchOpen ? 'block w-full absolute left-0 top-[10px] z-50 px-2' : 'hidden sm:block'}`}
+                ref={searchRef}
+            >
                 <div className="relative group">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 group-focus-within:text-primary transition-colors" />
                     <input
@@ -157,26 +167,40 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
                         placeholder="Search docs..."
                         value={searchQuery}
                         onChange={handleSearch}
+                        ref={input => isMobileSearchOpen && input && input.focus()} // Auto-focus on mobile open
                         onFocus={() => searchQuery.length > 0 && setShowResults(true)}
-                        className="w-full h-10 pl-10 pr-12 bg-muted/50 border border-transparent rounded-full text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all"
+                        className="w-full h-10 pl-10 pr-12 bg-muted/50 border border-transparent rounded-full text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:bg-background focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
                     />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
-                        <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded border border-border bg-muted font-mono text-[10px] font-medium text-muted-foreground px-1.5">
-                            <span className="text-xs">⌘</span>K
-                        </kbd>
-                    </div>
+
+                    {/* Mobile Close X (Only when open on mobile) */}
+                    {isMobileSearchOpen && (
+                        <button
+                            onClick={() => setIsMobileSearchOpen(false)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground p-1"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+
+                    {!isMobileSearchOpen && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+                            <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded border border-border bg-muted font-mono text-[10px] font-medium text-muted-foreground px-1.5">
+                                <span className="text-xs">⌘</span>K
+                            </kbd>
+                        </div>
+                    )}
                 </div>
 
                 {/* SEARCH RESULTS DROPDOWN */}
                 {showResults && (
-                    <div className="absolute top-full left-4 right-4 mt-2 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full left-0 right-0 sm:left-4 sm:right-4 mt-2 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 mx-2 sm:mx-0 max-h-[60vh] overflow-y-auto">
                         {searchResults.length > 0 ? (
                             <ul className="py-2">
                                 {searchResults.map((result, index) => (
                                     <li key={index}>
                                         <button
                                             onClick={() => handleResultClick(result.path)}
-                                            className="w-full text-left px-4 py-2 hover:bg-muted transition-colors flex items-center justify-between group"
+                                            className="w-full text-left px-4 py-3 sm:py-2 hover:bg-muted transition-colors flex items-center justify-between group border-b border-border/50 last:border-0"
                                         >
                                             <span className="font-medium text-sm group-hover:text-primary transition-colors">{result.title}</span>
                                             <span className="text-xs text-muted-foreground bg-muted-foreground/10 px-2 py-0.5 rounded">{result.category}</span>
@@ -195,7 +219,15 @@ const Navbar = ({ onHamburgerClick, onToggleMobileMenu, isDark, toggleTheme, sho
 
 
             {/* 🟪 RIGHT: ACTIONS & UTILITIES */}
-            <div className="flex items-center gap-2 sm:gap-4 pl-4">
+            <div className={`flex items-center gap-2 sm:gap-4 pl-4 ${isMobileSearchOpen ? 'hidden' : 'flex'}`}>
+
+                {/* Mobile Search Trigger */}
+                <button
+                    onClick={() => setIsMobileSearchOpen(true)}
+                    className="sm:hidden p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                >
+                    <Search size={20} />
+                </button>
 
                 {/* Version Badge */}
                 <span className="hidden lg:block text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">

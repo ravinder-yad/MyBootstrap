@@ -88,7 +88,7 @@ const ExamplesPage = () => {
     ];
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-16">
             {/* 1. HEADER */}
             <div className="text-center max-w-2xl mx-auto pt-8">
                 <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-foreground">
